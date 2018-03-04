@@ -11,7 +11,7 @@
 
 namespace A2lix\TranslationFormBundle\Form\EventListener;
 
-use A2lix\AutoFormBundle\Form\Manipulator\FormManipulatorInterface;
+use A2lix\TranslationFormBundle\Form\Type\AutoFormType;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -19,17 +19,6 @@ use Symfony\Component\Form\FormInterface;
 
 class TranslationsListener implements EventSubscriberInterface
 {
-    /** @var FormManipulatorInterface */
-    private $formManipulator;
-
-    /**
-     * @param FormManipulatorInterface $formManipulator
-     */
-    public function __construct(FormManipulatorInterface $formManipulator)
-    {
-        $this->formManipulator = $formManipulator;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -54,7 +43,7 @@ class TranslationsListener implements EventSubscriberInterface
 
         foreach ($formOptions['locales'] as $locale) {
             if (isset($fieldsOptions[$locale])) {
-                $form->add($locale, 'A2lix\AutoFormBundle\Form\Type\AutoFormType', [
+                $form->add($locale, AutoFormType::class, [
                     'data_class' => $translationClass,
                     'required' => in_array($locale, $formOptions['required_locales'], true),
                     'block_name' => ('field' === $formOptions['theming_granularity']) ? 'locale' : null,
@@ -116,7 +105,8 @@ class TranslationsListener implements EventSubscriberInterface
     {
         $fieldsOptions = [];
 
-        $fieldsConfig = $this->formManipulator->getFieldsConfig($form);
+        $fieldsConfig = $formOptions['fields'];
+
         foreach ($fieldsConfig as $fieldName => $fieldConfig) {
             // Simplest case: General options for all locales
             if (!isset($fieldConfig['locale_options'])) {
